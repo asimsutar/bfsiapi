@@ -1,0 +1,41 @@
+package com.tcs.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class SecurityConfig {
+	@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+
+        http.csrf(csrf -> csrf.disable())
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/kyc/submit").authenticated()
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(
+            jwtAuthFilter(),
+            UsernamePasswordAuthenticationFilter.class
+        );
+
+
+        return http.build();
+    }
+	
+	@Bean
+    public JwtAuthFilter jwtAuthFilter() {
+        return new JwtAuthFilter();
+    }
+	
+	@Bean
+	public RestTemplate restTemplate() {
+	    return new RestTemplate();
+	}
+}

@@ -1,0 +1,50 @@
+server:
+  port: 9088
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        # =====================
+        # AUTH SERVICE (OPEN)
+        # =====================
+        - id: auth-service
+          uri: http://localhost:9001
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AddRequestHeader=X-INTERNAL-CALL, GATEWAY
+
+        # =====================
+        # USER SERVICE (LOCKED)
+        # =====================
+        - id: user-service
+          uri: http://localhost:9002
+          predicates:
+            - Path=/users/**
+          filters:
+            - AddRequestHeader=X-INTERNAL-CALL, GATEWAY
+
+        # =====================
+        # KYC SERVICE (JWT)
+        # =====================
+        - id: kyc-service
+          uri: http://localhost:9003
+          predicates:
+            - Path=/kyc/**
+          filters:
+            - JwtAuth
+
+        # =====================
+        # TRANSACTION SERVICE (JWT + ROLE + KYC)
+        # =====================
+        - id: transaction-service
+          uri: http://localhost:9004
+          predicates:
+            - Path=/transactions/**
+          filters:
+            - JwtAuth

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.tcs.filter.JwtFilter&apos; to &apos;JwtAuthGatewayFilterFactory&apos;&#x0A;- Original project: &apos;api-gateway&apos;&#x0A;- Original element: &apos;com.tcs.filter.JwtFilter&apos;&#x0A;- Renamed element: &apos;com.tcs.filter.JwtAuthGatewayFilterFactory&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;JwtFilter&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.tcs.filter{JwtFilter.java[JwtFilter" matchStrategy="1" name="JwtAuthGatewayFilterFactory" qualified="false" references="true" similarDeclarations="false" stamp="1766648788699" textual="false" version="1.0"/>
+</session>

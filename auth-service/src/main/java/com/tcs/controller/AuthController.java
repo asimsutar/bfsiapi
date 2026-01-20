@@ -1,0 +1,80 @@
+package com.tcs.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import com.tcs.dto.AuthUserResponse;
+import com.tcs.dto.LoginRequest;
+import com.tcs.dto.LoginResponse;
+import com.tcs.util.JwtUtil;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Value("${user.service.url}")
+    private String userServiceUrl;
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
+
+        //  Prepare internal header
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-INTERNAL-CALL", "AUTH");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        //  Call USER-SERVICE with header
+        String url = userServiceUrl + "/users/username/" + request.getUsername();
+
+        ResponseEntity<AuthUserResponse> response =
+                restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        entity,
+                        AuthUserResponse.class
+                );
+
+        AuthUserResponse user = response.getBody();
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        //  Verify password (BCrypt)
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        //  Generate JWT with claims
+        String token = jwtUtil.generateToken(
+                user.getUsername(),
+                user.getRole(),
+                user.getKycStatus()
+        );
+
+        return new LoginResponse(token);
+    }
+}
